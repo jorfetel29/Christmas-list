@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glowing Snow List</title>
+    <style>
+        body {
+            margin: 0;
+            background-color: darkblue;
+            overflow-x: hidden;
+            font-family: sans-serif;
+        }
+
+        /* Snow animation */
+        .snowflake {
+            position: fixed;
+            top: -10px;
+            color: white;
+            font-size: 1em;
+            user-select: none;
+            pointer-events: none;
+            animation-name: fall;
+            animation-timing-function: linear;
+            animation-iteration-count: infinite;
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(0) rotate(0deg); }
+            100% { transform: translateY(110vh) rotate(360deg); }
+        }
+
+        #inputContainer {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        #MyInput {
+            width: 600px;
+            font-size: 24px;
+            color: #00f7ff;
+            padding: 15px;
+            border-radius: 10px;
+            box-sizing: border-box;
+            background-color: darkblue;
+            border: 2px solid #00f7ff;
+            text-shadow:
+                0 0 5px #00baff,
+                0 0 10px #0080ff,
+                0 0 20px #005eff,
+                0 0 30px #001dff;
+        }
+
+        #myList {
+            margin-top: 20px;
+            color: #00f7ff;
+            font-size: 24px;
+            list-style: none;
+            padding-left: 20px;
+        }
+
+        #myList li {
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            text-shadow:
+                0 0 5px #00baff,
+                0 0 10px #0080ff,
+                0 0 20px #005eff,
+                0 0 30px #001dff;
+        }
+
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 15px;
+            accent-color: green;
+            cursor: pointer;
+        }
+
+        .removeBtn {
+            margin-left: auto;
+            padding: 5px 10px;
+            font-size: 16px;
+            border: 2px solid #00f7ff;
+            background-color: #00f7ff;
+            color: darkblue;
+            border-radius: 5px;
+            cursor: pointer;
+            text-shadow: none;
+        }
+
+        .removeBtn:hover {
+            background-color: #0080ff;
+            border-color: #0080ff;
+        }
+    </style>
+</head>
+
+<body>
+    <ul id="myList"></ul>
+
+    <div id="inputContainer">
+        <input id="MyInput" type="text" placeholder="Type here...">
+    </div>
+
+    <script>
+        // Add item to list
+        function addToList() {
+            let input = document.getElementById("MyInput").value;
+            if (input !== "") {
+                let li = document.createElement("li");
+
+                let checkbox = document.createElement("input");
+                checkbox.type = "checkbox";
+                checkbox.onchange = saveList;
+
+                let text = document.createElement("span");
+                text.textContent = input;
+
+                let removeBtn = document.createElement("button");
+                removeBtn.textContent = "Remove";
+                removeBtn.className = "removeBtn";
+                removeBtn.onclick = () => {
+                    li.remove();
+                    saveList();
+                };
+
+                li.appendChild(checkbox);
+                li.appendChild(text);
+                li.appendChild(removeBtn);
+
+                document.getElementById("myList").appendChild(li);
+                document.getElementById("MyInput").value = "";
+
+                saveList();
+            }
+        }
+
+        // Save current list to localStorage
+        function saveList() {
+            const listItems = [];
+            document.querySelectorAll("#myList li").forEach(li => {
+                const text = li.querySelector("span").textContent;
+                const checked = li.querySelector("input[type='checkbox']").checked;
+                listItems.push({ text, checked });
+            });
+            localStorage.setItem("myListData", JSON.stringify(listItems));
+        }
+
+        // Load list from localStorage
+        function loadList() {
+            const saved = localStorage.getItem("myListData");
+            if (saved) {
+                JSON.parse(saved).forEach(item => {
+                    let li = document.createElement("li");
+
+                    let checkbox = document.createElement("input");
+                    checkbox.type = "checkbox";
+                    checkbox.checked = item.checked;
+                    checkbox.onchange = saveList;
+
+                    let text = document.createElement("span");
+                    text.textContent = item.text;
+
+                    let removeBtn = document.createElement("button");
+                    removeBtn.textContent = "Remove";
+                    removeBtn.className = "removeBtn";
+                    removeBtn.onclick = () => {
+                        li.remove();
+                        saveList();
+                    };
+
+                    li.appendChild(checkbox);
+                    li.appendChild(text);
+                    li.appendChild(removeBtn);
+
+                    document.getElementById("myList").appendChild(li);
+                });
+            }
+        }
+
+        // Press Enter to add
+        document.getElementById("MyInput").addEventListener("keypress", function(e) {
+            if (e.key === "Enter") {
+                addToList();
+            }
+        });
+
+        // Snow generation
+        function createSnowflake() {
+            const snowflake = document.createElement("div");
+            snowflake.className = "snowflake";
+            snowflake.textContent = "❄";
+            snowflake.style.left = Math.random() * window.innerWidth + "px";
+            snowflake.style.fontSize = (10 + Math.random() * 20) + "px";
+            snowflake.style.animationDuration = (5 + Math.random() * 5) + "s";
+            document.body.appendChild(snowflake);
+
+            setTimeout(() => snowflake.remove(), 10000);
+        }
+
+        setInterval(createSnowflake, 200);
+
+        // Load saved list on page load
+        window.onload = loadList;
+    </script>
+</body>
+</html>
